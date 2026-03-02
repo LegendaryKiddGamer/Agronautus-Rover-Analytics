@@ -1,792 +1,1592 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Rover IoT Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rover AI Command Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --title-font: 'Orbitron', 'Segoe UI', sans-serif;
-  --bg-a: #08210f;
-  --bg-b: #12321c;
-  --cyan: #33b267;   /* main accent */
-  --safe: #33b267;
-  --warn: #8fbf3f;
-  --danger: #d64545;
-  --accent-color: #2f8a55;
-  --title-color: #b8ffd0;
-  --ui-text: #8fe7b5;
-  --ui-border: #57bf81;
-  --ui-strong: #b9ffd5;
-  --toggle-on: #63da96;
-}
+  :root {
+    --bg-a: #081f12;
+    --bg-b: #123723;
+    --panel: rgba(15, 33, 23, 0.92);
+    --panel-soft: rgba(16, 39, 27, 0.82);
+    --border: #46a76d;
+    --text: #e9fff2;
+    --muted: #a8d9bb;
+    --title: #bfffd6;
+    --danger: #ff6666;
+    --warn: #ffcf5f;
+    --ok: #6fe9a2;
+    --accent: #58c683;
+  }
+
   * { box-sizing: border-box; }
 
   body {
-    background: linear-gradient(135deg, var(--bg-a), var(--bg-b));
-    color: #fff;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
+    margin: 0;
+    color: var(--text);
+    font-family: Inter, sans-serif;
+    background: radial-gradient(circle at 15% 10%, #194c2f 0%, transparent 35%),
+                radial-gradient(circle at 85% 80%, #0f3f25 0%, transparent 30%),
+                linear-gradient(145deg, var(--bg-a), var(--bg-b));
+    padding: 18px;
+  }
+
+  h1, h2, h3 {
+    font-family: Orbitron, sans-serif;
+    color: var(--title);
+    letter-spacing: 0.7px;
+    text-shadow: 0 0 10px rgba(191, 255, 214, 0.45);
     margin: 0;
   }
 
   h1 {
-    color: var(--title-color);
-    text-shadow: 0 0 12px rgba(141, 255, 178, 0.65);
-    font-family: var(--title-font);
-    font-weight: 800;
-    letter-spacing: 1.6px;
+    font-size: 1.9rem;
     margin-bottom: 8px;
   }
 
-  .legend {
-    margin-bottom: 18px;
-    font-size: 15px;
-    font-family: var(--title-font);
-  }
-
-  .legend span { margin-right: 14px; }
-
-  .cards-container {
+  .topbar {
     display: flex;
-    gap: 18px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 24px;
-    width: 100%;
-  }
-
-  .card {
-    background: rgba(20, 20, 40, 0.92);
-    border-radius: 16px;
-    box-shadow: 0 0 20px var(--accent-color);
-    padding: 22px;
-    width: 285px;
-    text-align: center;
-    transition: 0.25s;
-  }
-
-  .card:hover {
-    box-shadow: 0 0 38px var(--accent-color);
-    transform: translateY(-3px);
-  }
-
-  .card h2 {
-    color: var(--title-color);
-    text-shadow: 0 0 10px rgba(141, 255, 178, 0.45);
-    margin-top: 0;
-    font-family: var(--title-font);
-    font-weight: 700;
-    letter-spacing: 0.7px;
-    font-size: 1.02rem;
-  }
-
-  .reading {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin: 8px 0;
-  }
-
-  .sensor-toggle {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0;
-  }
-
-  .sensor-toggle label {
-    display: flex;
+    justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .chip {
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: rgba(16, 40, 28, 0.8);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    background: #20583a;
+    color: var(--text);
+    border: 1px solid #6fda9e;
+    border-radius: 10px;
+    padding: 7px 12px;
     cursor: pointer;
-    color: var(--ui-strong);
     font-weight: 600;
   }
 
-  .sensor-toggle input[type="checkbox"] {
-    width: 40px;
-    height: 20px;
-    appearance: none;
-    background: #222;
-    border-radius: 10px;
-    position: relative;
-    outline: none;
-    transition: 0.3s;
+  .btn:hover { filter: brightness(1.08); }
+
+  .grid {
+    display: grid;
+    gap: 14px;
   }
 
-  .sensor-toggle input[type="checkbox"]:checked {
-    background: var(--toggle-on);
-    box-shadow: 0 0 8px rgba(99, 218, 150, 0.65);
+  .sensor-grid {
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   }
 
-  .sensor-toggle input[type="checkbox"]::before {
-    content: '';
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    background: #fff;
-    border-radius: 50%;
-    top: 1px;
-    left: 1px;
-    transition: 0.3s;
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 0 16px rgba(70, 167, 109, 0.25);
   }
 
-  .sensor-toggle input[type="checkbox"]:checked::before {
-    transform: translateX(20px);
-    background: #000;
+  .panel h3 {
+    margin-bottom: 10px;
+    line-height: 1.18;
   }
+
+  .panel-soft {
+    background: var(--panel-soft);
+    border: 1px solid rgba(111, 218, 158, 0.5);
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin: 6px 0;
+    color: #f0fff6;
+  }
+
+  .tiny {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .toggle-row input { accent-color: var(--ok); }
 
   table {
-    margin-top: 14px;
-    border-collapse: collapse;
-    color: var(--ui-text);
-    font-size: 13px;
     width: 100%;
+    margin-top: 6px;
+    border-collapse: collapse;
+    font-size: 0.78rem;
   }
 
-  table, th, td {
-    border: 1px solid var(--ui-border);
-    padding: 7px 10px;
+  th, td {
+    border: 1px solid #5fbc85;
+    padding: 5px 6px;
+    color: #bdeccc;
+    text-align: left;
   }
 
-  th {
-    background: rgba(87, 191, 129, 0.22);
-    color: var(--ui-strong);
-    font-family: var(--title-font);
-    letter-spacing: 0.6px;
-  }
+  th { color: #d4ffe4; background: rgba(58, 142, 95, 0.28); }
 
-  .humidity-gauge-wrap {
+  .ai-status {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
     align-items: center;
-    gap: 10px;
   }
 
-  .humidity-gauge {
-    width: 165px;
-    height: 165px;
+  .score-pill {
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(22, 56, 38, 0.9);
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    margin-top: 14px;
+  }
+
+  .chart-grid {
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    margin-top: 10px;
+  }
+
+  .chart-grid canvas {
+    height: 200px !important;
+    max-height: 200px;
+  }
+
+  canvas {
+    width: 100%;
+    background: rgba(8, 25, 16, 0.9);
+    border-radius: 10px;
+    border: 1px solid rgba(111, 218, 158, 0.4);
+  }
+
+  .gauge-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 230px;
+  }
+
+  .gauge {
+    width: 170px;
+    height: 170px;
     border-radius: 50%;
-    background: conic-gradient(var(--safe) 0deg, rgba(255, 255, 255, 0.1) 0deg);
+    background: conic-gradient(var(--ok) 0deg, rgba(255, 255, 255, 0.12) 0deg);
     position: relative;
-    box-shadow: 0 0 20px rgba(29,185,84);
+    box-shadow: 0 0 18px rgba(111, 233, 162, 0.35);
   }
 
-  .humidity-gauge::after {
-    content: '';
+  .gauge::after {
+    content: "";
     position: absolute;
     inset: 16px;
     border-radius: 50%;
-    background: rgba(12, 18, 30, 0.95);
+    background: #10281b;
   }
 
-  .humidity-value {
+  .gauge-value {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2;
-    font-size: 1.7rem;
+    font-size: 1.55rem;
     font-weight: 800;
-    color: #e8ffff;
+    color: #e4fff0;
   }
 
-  .humidity-label {
-    color: #bff;
-    font-size: 0.92rem;
+  .forecast-table td, .forecast-table th { text-align: center; }
+
+  #forecastRisk {
+    display: block;
+    margin-top: 10px;
+    padding-left: 2px;
+    line-height: 1.3;
   }
 
-  .ai-panel {
-    width: min(950px, 96vw);
-    text-align: left;
-    margin-bottom: 24px;
-  }
-
-  #aiStatus {
-    font-weight: 800;
-    font-size: 1.18rem;
-  }
-
-  #aiReason {
-    margin-top: 8px;
-    color: #cff;
-    font-size: 0.92rem;
-    line-height: 1.45;
-  }
-
-  #aiForecast {
-    margin-top: 8px;
-    color: #ffe78a;
-    font-size: 0.95rem;
-    line-height: 1.45;
-  }
-
-  #aiActionHeader {
-    margin-top: 12px;
-    margin-bottom: 8px;
-    color: var(--title-color);
-    font-family: var(--title-font);
-    font-size: 1rem;
-  }
-
-  #actionList {
+  .list {
     margin: 0;
-    padding-left: 18px;
-    color: #ecffff;
-    font-size: 0.93rem;
-    line-height: 1.5;
-  }
-
-  #lastUpdated {
-    margin-top: 12px;
-    color: #9ff;
+    padding-left: 1.2rem;
+    color: #cbf7d9;
+    line-height: 1.42;
     font-size: 0.9rem;
   }
 
-  #charts-container {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
+  .list li {
+    margin: 0 0 6px;
+    padding-left: 2px;
   }
 
-  .chart-panel {
+  ol.list {
+    padding-left: 1.35rem;
+  }
+
+  ol.list li::marker {
+    color: #d6ffe6;
+    font-weight: 700;
+  }
+
+  .health-row {
+    margin-top: 10px;
+  }
+
+  .health-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    color: #c9f5d9;
+  }
+
+  .bar {
+    height: 10px;
+    border-radius: 8px;
+    background: #173826;
+    border: 1px solid #3f8c60;
+    overflow: hidden;
+  }
+
+  .bar > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #5ed98e, #b7ffcf);
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .contrib-row {
+    display: grid;
+    grid-template-columns: 95px 1fr 44px;
+    gap: 8px;
+    align-items: center;
+    margin-top: 7px;
+    font-size: 0.85rem;
+  }
+
+  .contrib-track {
+    height: 8px;
+    border-radius: 8px;
+    background: #173827;
+    border: 1px solid #397c58;
+    overflow: hidden;
+  }
+
+  .contrib-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #56d388, #95ffc2);
+    width: 0%;
+  }
+
+  .rec-item {
+    margin-bottom: 8px;
+  }
+
+  .rec-item > div:first-child {
+    line-height: 1.35;
+    padding-right: 2px;
+  }
+
+  .rec-actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .rec-btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border: 1px solid #6fd69a;
+    background: #1b4a32;
+    color: #d5ffe6;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .sim-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 8px;
+  }
+
+  .sim-grid label {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: #cef8dd;
+    line-height: 1.2;
   }
 
-  .chart-title {
-    margin: 0 0 8px 0;
-    color: var(--title-color);
-    text-shadow: 0 0 10px rgba(141, 255, 178, 0.45);
-    font-family: var(--title-font);
-    letter-spacing: 0.6px;
-    font-size: 0.95rem;
+  input[type="range"] { width: 100%; accent-color: #7ee9ab; }
+
+  .heatmap-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
-  canvas {
-    background: rgba(20, 20, 40, 0.82);
-    border-radius: 12px;
-    padding: 12px;
-    box-shadow: 0 0 20px var(--accent-color);
-    width: 540px;
-    height: 290px;
-    max-width: 95vw;
+  .heatmap-wrap > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
-  @media (max-width: 700px) {
-    .card { width: 100%; }
-    .humidity-gauge { width: 145px; height: 145px; }
-    canvas { width: 100% !important; height: auto !important; max-width: 100% !important; }
+  #heatmapCanvas {
+    width: 300px;
+    height: 300px;
+  }
+
+  .chat-box {
+    background: rgba(10, 28, 19, 0.95);
+    border: 1px solid #4d9f72;
+    border-radius: 10px;
+    height: 240px;
+    overflow-y: auto;
+    padding: 8px;
+    font-size: 0.88rem;
+  }
+
+  .chat-msg { margin-bottom: 8px; }
+  .chat-msg b { color: #bfffd6; }
+  .chat-content.typing::after {
+    content: "|";
+    display: inline-block;
+    margin-left: 2px;
+    color: #d5ffe6;
+    animation: cursor-blink 0.9s steps(1) infinite;
+  }
+  @keyframes cursor-blink {
+    0%, 45% { opacity: 1; }
+    46%, 100% { opacity: 0; }
+  }
+
+  .chat-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .chat-row input {
+    flex: 1;
+    background: #0f2a1c;
+    border: 1px solid #4e9d73;
+    color: #e9fff2;
+    border-radius: 8px;
+    padding: 8px;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .kpi {
+    border: 1px solid #4f9f73;
+    background: rgba(19, 46, 31, 0.88);
+    border-radius: 10px;
+    padding: 8px;
+  }
+
+  .kpi .k { font-size: 0.76rem; color: #b5e7c7; }
+  .kpi .v { font-size: 1.05rem; font-weight: 700; color: #ecfff4; }
+
+  .muted { color: var(--muted); }
+
+  @media (max-width: 720px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    #heatmapCanvas { width: 100%; max-width: 320px; height: auto; }
   }
 </style>
 </head>
 <body>
-<h1>Rover IoT Dashboard</h1>
-<div class="legend">
-  <span style="color:#5ad88d;">Green = Safe</span>
-  <span style="color:#f00;">Red = Unsafe</span>
-</div>
-
-<div class="cards-container">
-  <div class="card">
-    <h2>Ultrasonic Distance (cm)</h2>
-    <p class="reading" id="ultrasonic">--</p>
-    <div class="sensor-toggle">
-      <label><input type="checkbox" id="toggleUltrasonic" checked /> Sensor ON/OFF</label>
+  <div class="topbar">
+    <div>
+      <h1>Rover AI Command Dashboard</h1>
+      <div class="tiny">Hydroponic suitability intelligence with forecasting, anomaly detection, digital twin, vision, and autonomous planning.</div>
     </div>
-    <table id="ultrasonicTable"><tr><th>Time</th><th>Distance (cm)</th></tr></table>
-  </div>
-
-  <div class="card">
-    <h2>Soil Moisture</h2>
-    <p class="reading" id="soil">--</p>
-    <div class="sensor-toggle">
-      <label><input type="checkbox" id="toggleSoil" checked /> Sensor ON/OFF</label>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <span class="chip" id="pollStatus">Polling: --</span>
+      <span class="chip" id="sourceStatus">AI Source: --</span>
+      <button class="btn" id="refreshBtn">Refresh Now</button>
     </div>
-    <table id="soilTable"><tr><th>Time</th><th>Soil Moisture</th></tr></table>
   </div>
 
-  <div class="card">
-    <h2>Gas Sensor (MQ-135)</h2>
-    <p class="reading" id="gas">--</p>
-    <div class="sensor-toggle">
-      <label><input type="checkbox" id="toggleGas" checked /> Sensor ON/OFF</label>
+  <div class="grid sensor-grid">
+    <div class="panel">
+      <h3>Ultrasonic (cm)</h3>
+      <div class="value" id="ultrasonicValue">--</div>
+      <label class="toggle-row"><input type="checkbox" id="toggleUltrasonic" checked> Stream on chart</label>
+      <table id="ultrasonicTable"><tr>
+<th>Time</th>
+<th>Value</th>
+</tr></table>
     </div>
-    <table id="gasTable"><tr><th>Time</th><th>Gas Value</th></tr></table>
-  </div>
-
-  <div class="card">
-    <h2>Temperature (degC)</h2>
-    <p class="reading" id="temperature">--</p>
-    <table id="temperatureTable"><tr><th>Time</th><th>Temperature</th></tr></table>
-  </div>
-
-  <div class="card">
-    <h2>Humidity Gauge (%)</h2>
-    <div class="humidity-gauge-wrap">
-      <div class="humidity-gauge" id="humidityGauge">
-        <div class="humidity-value" id="humidityGaugeValue">--</div>
+    <div class="panel">
+      <h3>Soil Moisture</h3>
+      <div class="value" id="soilValue">--</div>
+      <label class="toggle-row"><input type="checkbox" id="toggleSoil" checked> Stream on chart</label>
+      <table id="soilTable"><tr>
+<th>Time</th>
+<th>Value</th>
+</tr></table>
+    </div>
+    <div class="panel">
+      <h3>Gas (MQ-135)</h3>
+      <div class="value" id="gasValue">--</div>
+      <label class="toggle-row"><input type="checkbox" id="toggleGas" checked> Stream on chart</label>
+      <table id="gasTable"><tr>
+<th>Time</th>
+<th>Value</th>
+</tr></table>
+    </div>
+    <div class="panel">
+      <h3>Temperature (&deg;C)</h3>
+      <div class="value" id="tempValue">--</div>
+      <table id="tempTable"><tr>
+<th>Time</th>
+<th>Value</th>
+</tr></table>
+    </div>
+    <div class="panel">
+      <h3>Humidity Gauge</h3>
+      <div class="gauge-wrap">
+        <div class="gauge" id="humidityGauge">
+          <div class="gauge-value" id="humidityValue">--</div>
+        </div>
+        <div class="tiny" id="humidityCaption">Waiting for humidity data...</div>
       </div>
-      <p class="humidity-label" id="humidityGaugeLabel">Waiting for humidity data...</p>
+      <table id="humTable"><tr>
+<th>Time</th>
+<th>Value</th>
+</tr></table>
     </div>
-    <table id="humidityTable"><tr><th>Time</th><th>Humidity (%)</th></tr></table>
   </div>
+
+  <div class="panel" style="margin-top:14px;">
+    <div class="ai-status">
+      <div>
+        <h2>AI Plant Status</h2>
+        <div class="tiny" id="aiReason">Waiting for data...</div>
+      </div>
+      <div class="score-pill" id="aiScorePill">--</div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi">
+<div class="k">Score</div>
+<div class="v" id="kpiScore">--</div>
 </div>
-
-<div class="card ai-panel">
-  <h2>AI Plant Status</h2>
-  <p id="aiStatus">--</p>
-  <p id="aiReason">Waiting for data...</p>
-  <p id="aiForecast">Forecast: Waiting for enough trend data...</p>
-  <p id="aiActionHeader">Recommended Actions</p>
-  <ol id="actionList">
-    <li>Waiting for live data before generating actions.</li>
-  </ol>
-  <p id="lastUpdated">Last updated: --</p>
+      <div class="kpi">
+<div class="k">Class</div>
+<div class="v" id="kpiClass">--</div>
 </div>
-
-<div id="charts-container">
-  <div class="chart-panel">
-    <h3 class="chart-title">Ultrasonic Distance (cm)</h3>
-    <canvas id="ultrasonicChart" width="540" height="290"></canvas>
-  </div>
-
-  <div class="chart-panel">
-    <h3 class="chart-title">Soil Moisture</h3>
-    <canvas id="soilChart" width="540" height="290"></canvas>
-  </div>
-
-  <div class="chart-panel">
-    <h3 class="chart-title">Gas Sensor (MQ-135)</h3>
-    <canvas id="gasChart" width="540" height="290"></canvas>
-  </div>
-
-  <div class="chart-panel">
-    <h3 class="chart-title">Temperature Bar Chart (degC)</h3>
-    <canvas id="temperatureBarChart" width="540" height="290"></canvas>
-  </div>
+      <div class="kpi">
+<div class="k">Confidence</div>
+<div class="v" id="kpiConf">--</div>
 </div>
+      <div class="kpi">
+<div class="k">Last Update</div>
+<div class="v" id="kpiLast">--</div>
+</div>
+    </div>
+  </div>
+
+  <div class="grid chart-grid" style="margin-top:14px;">
+    <div class="panel">
+<h3>Ultrasonic Trend</h3>
+<canvas id="ultrasonicChart" height="200"></canvas>
+</div>
+    <div class="panel">
+<h3>Soil Moisture Trend</h3>
+<canvas id="soilChart" height="200"></canvas>
+</div>
+    <div class="panel">
+<h3>Gas Trend</h3>
+<canvas id="gasChart" height="200"></canvas>
+</div>
+    <div class="panel">
+<h3>Temperature Bar Chart</h3>
+<canvas id="tempBarChart" height="200"></canvas>
+</div>
+  </div>
+
+  <div class="grid feature-grid">
+    <div class="panel">
+      <h3>Forecasting (10m / 30m / 60m)</h3>
+      <table class="forecast-table" id="forecastTable">
+        <tr>
+<th>Sensor</th>
+<th>Now</th>
+<th>+10m</th>
+<th>+30m</th>
+<th>+60m</th>
+</tr>
+      </table>
+      <div class="tiny" id="forecastRisk">Forecast risk: --</div>
+    </div>
+
+    <div class="panel">
+      <h3>Anomaly Detection</h3>
+      <ul class="list" id="anomalyList"><li>No anomalies yet.</li></ul>
+    </div>
+
+    <div class="panel">
+      <h3>Sensor Health &amp; Drift</h3>
+      <ul class="list" id="healthList"><li>Waiting for enough data...</li></ul>
+    </div>
+
+    <div class="panel">
+      <h3>Explainability (Feature Contribution)</h3>
+      <div id="contribBox"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Adaptive Recommendations</h3>
+      <ol class="list" id="recommendationsList"></ol>
+      <div class="tiny">Tip: vote actions with Upvote/Downvote so the dashboard learns what works best.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Digital Twin (What-if Simulation)</h3>
+      <div class="sim-grid">
+        <label>Temp delta (<span id="simTempVal">0</span>)<input id="simTemp" type="range" min="-10" max="10" value="0"></label>
+        <label>Humidity delta (<span id="simHumVal">0</span>)<input id="simHum" type="range" min="-25" max="25" value="0"></label>
+        <label>Soil delta (<span id="simSoilVal">0</span>)<input id="simSoil" type="range" min="-250" max="250" value="0"></label>
+        <label>Gas delta (<span id="simGasVal">0</span>)<input id="simGas" type="range" min="-150" max="150" value="0"></label>
+      </div>
+      <div class="panel-soft" style="margin-top:8px;">
+        <div id="simResult">Simulation score: --</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Spatial Suitability Heatmap</h3>
+      <div class="heatmap-wrap">
+        <canvas id="heatmapCanvas" width="320" height="320"></canvas>
+        <div style="min-width:190px;">
+          <div class="tiny" id="positionInfo">Position feed: waiting...</div>
+          <div style="margin-top:8px;"><b>Next waypoint:</b></div>
+          <div id="nextWaypoint" class="muted">--</div>
+          <div class="tiny" style="margin-top:8px;">Planner: explores least-sampled + highest-uncertainty cells.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Vision Fusion (Leaf Stress)</h3>
+      <input type="file" id="visionInput" accept="image/*" class="btn" style="padding:6px;">
+      <canvas id="visionCanvas" width="320" height="190" style="margin-top:8px;"></canvas>
+      <div class="tiny" id="visionResult">Upload an image to estimate greenness/stress index.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Predictive Maintenance</h3>
+      <div class="health-row">
+        <div class="health-label">
+<span>Pump Health</span><span id="pumpPct">--</span>
+</div>
+        <div class="bar"><span id="pumpBar"></span></div>
+      </div>
+      <div class="health-row">
+        <div class="health-label">
+<span>Fan Health</span><span id="fanPct">--</span>
+</div>
+        <div class="bar"><span id="fanBar"></span></div>
+      </div>
+      <div class="health-row">
+        <div class="health-label">
+<span>Sensor Network Health</span><span id="sensorPct">--</span>
+</div>
+        <div class="bar"><span id="sensorBar"></span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>AI Copilot Chat</h3>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="chat-row">
+        <input id="chatInput" placeholder="Ask: status, forecast, actions, next waypoint, anomalies...">
+        <button class="btn" id="chatSend">Send</button>
+      </div>
+    </div>
+  </div>
 
 <script>
 const THINGSPEAK_CHANNEL_ID = '3242443';
-const THINGSPEAK_READ_API_KEY = 'FYC6VEXZR1EEVI3B';
+const THINGSPEAK_READ_API_KEY = 'YOUR_THINGSPEAK_READ_API_KEY';
 const POLL_INTERVAL_MS = 15000;
+const MAX_HISTORY = 120;
 
-const ultrasonicData = { labels: [], data: [] };
-const soilData = { labels: [], data: [] };
-const gasData = { labels: [], data: [] };
-const temperatureBarData = { labels: [], data: [] };
+const actionStats = JSON.parse(localStorage.getItem('ai_action_stats_v1') || '{}');
 
-let previousSnapshot = null;
-
-const ranges = {
-  ultrasonic: { min: 0, max: 200 },
-  soil: { min: 300, max: 700 },
-  gas: { min: 0, max: 200 }
+const appState = {
+  latest: {
+    distance: NaN,
+    soil: NaN,
+    gas: NaN,
+    temp: NaN,
+    hum: NaN,
+    aiScore: NaN,
+    aiClass: NaN,
+    aiConf: NaN,
+    posX: NaN,
+    posY: NaN
+  },
+  history: {
+    t: [], distance: [], soil: [], gas: [], temp: [], hum: [], score: []
+  },
+  anomalies: [],
+  health: {},
+  recommendations: [],
+  vision: { greenRatio: NaN, stress: 'unknown' },
+  startMs: Date.now(),
+  sampleCount: 0,
+  heatmap: buildHeatmap(10)
 };
-
-const DARK_ACCENT = '#2f8a55';
-const TITLE_ACCENT = '#b8ffd0';
-
-function hexToRgba(hex, alpha) {
-  const clean = hex.replace('#', '');
-  const bigint = parseInt(clean.length === 3
-    ? clean.split('').map(c => c + c).join('')
-    : clean, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-function createLineChart(ctx, dataObj, label, color, range, maxY) {
-  return new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: dataObj.labels,
-      datasets: [{
-        label,
-        data: dataObj.data,
-        borderColor: color,
-        backgroundColor: hexToRgba(DARK_ACCENT, 0.2),
-        fill: true,
-        tension: 0.3,
-        segment: {
-          borderColor: seg => {
-            const prev = seg.p0.parsed.y;
-            const next = seg.p1.parsed.y;
-            return (prev < range.min || prev > range.max || next < range.min || next > range.max) ? '#ff5757' : color;
-          }
-        }
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { display: true, labels: { color: '#e8ffff' } },
-        title: { display: true, text: label, color: TITLE_ACCENT }
-      },
-      scales: {
-        y: { beginAtZero: true, max: maxY, ticks: { color: '#dff' } },
-        x: { ticks: { color: '#bff' } }
-      }
-    }
-  });
-}
-
-function createTemperatureBarChart(ctx, dataObj) {
-  return new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: dataObj.labels,
-      datasets: [{
-        label: 'Temperature (degC)',
-        data: dataObj.data,
-        borderColor: DARK_ACCENT,
-        backgroundColor: dataObj.data.map(() => hexToRgba(DARK_ACCENT, 0.85)),
-        borderWidth: 1
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { display: true, labels: { color: '#e8ffff' } },
-        title: { display: true, text: 'Temperature', color: TITLE_ACCENT }
-      },
-      scales: {
-        y: { beginAtZero: true, max: 50, ticks: { color: '#dff' } },
-        x: { ticks: { color: '#bff' } }
-      }
-    }
-  });
-}
-
-const ultrasonicChart = createLineChart(
-  document.getElementById('ultrasonicChart').getContext('2d'),
-  ultrasonicData,
-  'Distance',
-  DARK_ACCENT,
-  { min: 100, max: 1000 },
-  1000
-);
-
-const soilChart = createLineChart(
-  document.getElementById('soilChart').getContext('2d'),
-  soilData,
-  'Soil Moisture',
-  DARK_ACCENT,
-  { min: 300, max: 700 },
-  1100
-);
-
-const gasChart = createLineChart(
-  document.getElementById('gasChart').getContext('2d'),
-  gasData,
-  'Gas',
-  '#ffd23f',
-  ranges.gas,
-  800
-);
-
-const temperatureBarChart = createTemperatureBarChart(
-  document.getElementById('temperatureBarChart').getContext('2d'),
-  temperatureBarData
-);
 
 let ultrasonicEnabled = true;
 let soilEnabled = true;
 let gasEnabled = true;
 
-document.getElementById('toggleUltrasonic').addEventListener('change', e => ultrasonicEnabled = e.target.checked);
-document.getElementById('toggleSoil').addEventListener('change', e => soilEnabled = e.target.checked);
-document.getElementById('toggleGas').addEventListener('change', e => gasEnabled = e.target.checked);
+const el = {
+  pollStatus: document.getElementById('pollStatus'),
+  sourceStatus: document.getElementById('sourceStatus'),
+  refreshBtn: document.getElementById('refreshBtn'),
 
-function addPoint(dataObj, chart, label, value, maxPoints = 20) {
-  dataObj.labels.push(label);
-  dataObj.data.push(value);
-  if (dataObj.labels.length > maxPoints) {
-    dataObj.labels.shift();
-    dataObj.data.shift();
-  }
+  ultrasonicValue: document.getElementById('ultrasonicValue'),
+  soilValue: document.getElementById('soilValue'),
+  gasValue: document.getElementById('gasValue'),
+  tempValue: document.getElementById('tempValue'),
+  humidityValue: document.getElementById('humidityValue'),
+  humidityGauge: document.getElementById('humidityGauge'),
+  humidityCaption: document.getElementById('humidityCaption'),
 
-  if (chart.canvas.id === 'temperatureBarChart') {
-    chart.data.datasets[0].backgroundColor = dataObj.data.map(() => hexToRgba(DARK_ACCENT, 0.85));
-  }
+  ultrasonicTable: document.getElementById('ultrasonicTable'),
+  soilTable: document.getElementById('soilTable'),
+  gasTable: document.getElementById('gasTable'),
+  tempTable: document.getElementById('tempTable'),
+  humTable: document.getElementById('humTable'),
 
-  chart.update();
+  aiReason: document.getElementById('aiReason'),
+  aiScorePill: document.getElementById('aiScorePill'),
+  kpiScore: document.getElementById('kpiScore'),
+  kpiClass: document.getElementById('kpiClass'),
+  kpiConf: document.getElementById('kpiConf'),
+  kpiLast: document.getElementById('kpiLast'),
+
+  forecastTable: document.getElementById('forecastTable'),
+  forecastRisk: document.getElementById('forecastRisk'),
+  anomalyList: document.getElementById('anomalyList'),
+  healthList: document.getElementById('healthList'),
+  contribBox: document.getElementById('contribBox'),
+  recommendationsList: document.getElementById('recommendationsList'),
+
+  simTemp: document.getElementById('simTemp'),
+  simHum: document.getElementById('simHum'),
+  simSoil: document.getElementById('simSoil'),
+  simGas: document.getElementById('simGas'),
+  simTempVal: document.getElementById('simTempVal'),
+  simHumVal: document.getElementById('simHumVal'),
+  simSoilVal: document.getElementById('simSoilVal'),
+  simGasVal: document.getElementById('simGasVal'),
+  simResult: document.getElementById('simResult'),
+
+  heatmapCanvas: document.getElementById('heatmapCanvas'),
+  positionInfo: document.getElementById('positionInfo'),
+  nextWaypoint: document.getElementById('nextWaypoint'),
+
+  visionInput: document.getElementById('visionInput'),
+  visionCanvas: document.getElementById('visionCanvas'),
+  visionResult: document.getElementById('visionResult'),
+
+  pumpPct: document.getElementById('pumpPct'),
+  fanPct: document.getElementById('fanPct'),
+  sensorPct: document.getElementById('sensorPct'),
+  pumpBar: document.getElementById('pumpBar'),
+  fanBar: document.getElementById('fanBar'),
+  sensorBar: document.getElementById('sensorBar'),
+
+  chatBox: document.getElementById('chatBox'),
+  chatInput: document.getElementById('chatInput'),
+  chatSend: document.getElementById('chatSend'),
+
+  toggleUltrasonic: document.getElementById('toggleUltrasonic'),
+  toggleSoil: document.getElementById('toggleSoil'),
+  toggleGas: document.getElementById('toggleGas')
+};
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function lastN(arr, n) { return arr.slice(Math.max(0, arr.length - n)); }
+function mean(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : NaN; }
+function std(arr) {
+  if (arr.length < 2) return 0;
+  const m = mean(arr);
+  return Math.sqrt(mean(arr.map(v => (v - m) ** 2)));
+}
+function nowLabel(ts = new Date()) { return ts.toLocaleTimeString(); }
+
+function addRow(tableEl, time, value) {
+  const row = tableEl.insertRow(-1);
+  row.insertCell(0).innerText = time;
+  row.insertCell(1).innerText = value;
+  if (tableEl.rows.length > 16) tableEl.deleteRow(1);
 }
 
-function addRow(tableId, timeText, valueText) {
-  const table = document.getElementById(tableId);
-  const row = table.insertRow(-1);
-  row.insertCell(0).innerText = timeText;
-  row.insertCell(1).innerText = valueText;
-  if (table.rows.length > 21) table.deleteRow(1);
+function pushHistory(key, value) {
+  appState.history[key].push(value);
+  if (appState.history[key].length > MAX_HISTORY) appState.history[key].shift();
 }
 
-function updateHumidityGauge(value) {
-  const gauge = document.getElementById('humidityGauge');
-  const text = document.getElementById('humidityGaugeValue');
-  const label = document.getElementById('humidityGaugeLabel');
-
-  if (Number.isNaN(value) || value <= -100) {
-    gauge.style.background = 'conic-gradient(rgba(255,255,255,0.15) 0deg, rgba(255,255,255,0.15) 360deg)';
-    text.innerText = '--';
-    label.innerText = 'Humidity sensor unavailable';
-    return;
-  }
-
-  const clamped = Math.max(0, Math.min(100, value));
-  const angle = (clamped / 100) * 360;
-
-  let color = '#1db954';
-  let condition = 'Optimal humidity';
-  if (clamped < 40) {
-    color = '#ffd23f';
-    condition = 'Low humidity';
-  } else if (clamped > 80) {
-    color = '#ff5757';
-    condition = 'High humidity';
-  }
-
-  gauge.style.background = `conic-gradient(${color} ${angle}deg, rgba(255,255,255,0.15) ${angle}deg 360deg)`;
-  text.innerText = `${clamped.toFixed(0)}%`;
-  label.innerText = condition;
+function pushTimestamp(t) {
+  appState.history.t.push(t);
+  if (appState.history.t.length > MAX_HISTORY) appState.history.t.shift();
 }
 
-function clamp(v, lo, hi) {
-  return Math.max(lo, Math.min(hi, v));
+function buildHeatmap(size) {
+  const grid = [];
+  for (let y = 0; y < size; y++) {
+    const row = [];
+    for (let x = 0; x < size; x++) row.push({ count: 0, sum: 0 });
+    grid.push(row);
+  }
+  return { size, grid };
 }
 
 function scoreRange(value, minGood, maxGood, hardMin, hardMax) {
+  if (Number.isNaN(value)) return 0;
   if (value >= minGood && value <= maxGood) return 1;
   if (value < hardMin || value > hardMax) return 0;
   if (value < minGood) return (value - hardMin) / (minGood - hardMin);
   return (hardMax - value) / (hardMax - maxGood);
 }
 
-function localPrediction(distance, soil, gas, temp, hum) {
-  if ([distance, soil, gas, temp, hum].some(v => Number.isNaN(v))) return null;
-  if (temp <= -100 || hum <= -100) return null;
+function localPredictionWithExplain(s) {
+  const parts = [
+    { name: 'Distance', raw: s.distance, score: scoreRange(s.distance, 15, 120, 5, 200), weight: 0.10 },
+    { name: 'Soil', raw: s.soil, score: scoreRange(s.soil, 350, 700, 200, 950), weight: 0.25 },
+    { name: 'Gas', raw: s.gas, score: scoreRange(s.gas, 0, 180, 0, 500), weight: 0.30 },
+    { name: 'Temp', raw: s.temp, score: scoreRange(s.temp, 18, 30, 10, 40), weight: 0.20 },
+    { name: 'Humidity', raw: s.hum, score: scoreRange(s.hum, 45, 75, 20, 95), weight: 0.15 }
+  ];
 
-  const distScore = scoreRange(distance, 15, 120, 5, 200);
-  const soilScore = scoreRange(soil, 350, 700, 200, 950);
-  const gasScore = scoreRange(gas, 0, 180, 0, 500);
-  const tempScore = scoreRange(temp, 18, 30, 10, 40);
-  const humScore = scoreRange(hum, 45, 75, 20, 95);
-
-  const weighted = distScore * 0.10 + soilScore * 0.25 + gasScore * 0.30 + tempScore * 0.20 + humScore * 0.15;
+  const weighted = parts.reduce((sum, p) => sum + p.score * p.weight, 0);
   const score = Math.round(clamp(weighted, 0, 1) * 100);
-  const conf = clamp(0.55 + ((distScore + soilScore + gasScore + tempScore + humScore) / 5) * 0.45, 0.55, 1.0);
+  const conf = clamp(0.55 + mean(parts.map(p => p.score)) * 0.45, 0.55, 1);
   const cls = score >= 70 ? 1 : 0;
-  return { score, cls, conf };
+
+  const contributions = parts.map(p => ({
+    name: p.name,
+    points: Math.round(p.score * p.weight * 100),
+    score: p.score
+  }));
+
+  return { score, conf, cls, contributions };
 }
 
-function renderAI(score, cls, conf, sourceText) {
-  const aiStatus = document.getElementById('aiStatus');
-  const aiReason = document.getElementById('aiReason');
+function createLineChart(ctx, label, color, minSafe, maxSafe, maxY) {
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label,
+        data: [],
+        borderColor: color,
+        backgroundColor: 'rgba(88,198,131,0.18)',
+        fill: true,
+        tension: 0.28,
+        segment: {
+          borderColor: seg => {
+            const y0 = seg.p0.parsed.y;
+            const y1 = seg.p1.parsed.y;
+            return (y0 < minSafe || y0 > maxSafe || y1 < minSafe || y1 > maxSafe) ? '#ff6d6d' : color;
+          }
+        }
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#d9ffe8' } },
+        title: { display: true, text: label, color: '#bfffd6' }
+      },
+      scales: {
+        y: { beginAtZero: true, max: maxY, ticks: { color: '#bdeecf' } },
+        x: { ticks: { color: '#a6d8b8', maxRotation: 0 } }
+      }
+    }
+  });
+}
 
-  if (Number.isNaN(score)) {
-    aiStatus.innerText = '--';
-    aiStatus.style.color = '#fff';
-    aiReason.innerText = 'Waiting for AI values...';
+function createTempBarChart(ctx) {
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Temperature',
+        data: [],
+        borderColor: '#58c683',
+        backgroundColor: []
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#d9ffe8' } },
+        title: { display: true, text: 'Temperature', color: '#bfffd6' }
+      },
+      scales: {
+        y: { beginAtZero: true, max: 50, ticks: { color: '#bdeecf' } },
+        x: { ticks: { color: '#a6d8b8', maxRotation: 0 } }
+      }
+    }
+  });
+}
+
+const charts = {
+  ultrasonic: createLineChart(document.getElementById('ultrasonicChart').getContext('2d'), 'Ultrasonic Distance', '#74f2a9', 20, 1000, 1000),
+  soil: createLineChart(document.getElementById('soilChart').getContext('2d'), 'Soil Moisture', '#6fdf9b', 300, 700, 1100),
+  gas: createLineChart(document.getElementById('gasChart').getContext('2d'), 'Gas', '#d9c06a', 0, 200, 800),
+  tempBar: createTempBarChart(document.getElementById('tempBarChart').getContext('2d'))
+};
+
+function updateChart(chart, label, value, maxPoints = 40) {
+  chart.data.labels.push(label);
+  chart.data.datasets[0].data.push(value);
+  if (chart.data.labels.length > maxPoints) {
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
+  }
+  if (chart === charts.tempBar) {
+    chart.data.datasets[0].backgroundColor = chart.data.datasets[0].data.map(v => {
+      if (v > 32) return 'rgba(255, 108, 108, 0.82)';
+      if (v < 16) return 'rgba(103, 158, 255, 0.8)';
+      return 'rgba(88, 198, 131, 0.84)';
+    });
+  }
+  chart.update('none');
+}
+
+function updateHumidityGauge(h) {
+  if (Number.isNaN(h) || h <= -100) {
+    el.humidityValue.innerText = '--';
+    el.humidityCaption.innerText = 'Humidity sensor unavailable';
+    el.humidityGauge.style.background = 'conic-gradient(rgba(255,255,255,0.14) 0deg, rgba(255,255,255,0.14) 360deg)';
     return;
   }
 
-  const label = cls === 1 ? 'Suitable' : 'Not Suitable';
-  aiStatus.innerText = `${label} | Score: ${score}/100 | Confidence: ${conf.toFixed(2)}`;
-  aiStatus.style.color = cls === 1 ? '#72e4a2' : '#ff5757';
-  aiReason.innerText = sourceText;
+  const clamped = clamp(h, 0, 100);
+  const angle = clamped * 3.6;
+  let color = '#6fe9a2';
+  let label = 'Optimal humidity';
+  if (clamped < 40) { color = '#ffd56d'; label = 'Low humidity'; }
+  else if (clamped > 80) { color = '#ff7777'; label = 'High humidity'; }
+
+  el.humidityGauge.style.background = `conic-gradient(${color} ${angle}deg, rgba(255,255,255,0.14) ${angle}deg 360deg)`;
+  el.humidityValue.innerText = `${clamped.toFixed(0)}%`;
+  el.humidityCaption.innerText = label;
 }
 
-function getTrend(values) {
-  if (values.length < 2) return 0;
-  return values[values.length - 1] - values[0];
+function linearForecast(values, stepsAhead) {
+  if (values.length < 6) return NaN;
+  const y = lastN(values, 24);
+  const n = y.length;
+  let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+  for (let i = 0; i < n; i++) {
+    sumX += i;
+    sumY += y[i];
+    sumXY += i * y[i];
+    sumXX += i * i;
+  }
+  const slope = (n * sumXY - sumX * sumY) / Math.max(1e-9, (n * sumXX - sumX * sumX));
+  const intercept = (sumY - slope * sumX) / n;
+  const pred = slope * (n - 1 + stepsAhead) + intercept;
+  return pred;
 }
 
-function classifyTrend(delta, deadband) {
-  if (delta > deadband) return 'rising';
-  if (delta < -deadband) return 'falling';
-  return 'stable';
+function renderForecasts() {
+  const steps10 = Math.round((10 * 60) / (POLL_INTERVAL_MS / 1000));
+  const steps30 = Math.round((30 * 60) / (POLL_INTERVAL_MS / 1000));
+  const steps60 = Math.round((60 * 60) / (POLL_INTERVAL_MS / 1000));
+
+  const rows = [
+    ['Temp', appState.latest.temp, linearForecast(appState.history.temp, steps10), linearForecast(appState.history.temp, steps30), linearForecast(appState.history.temp, steps60)],
+    ['Humidity', appState.latest.hum, linearForecast(appState.history.hum, steps10), linearForecast(appState.history.hum, steps30), linearForecast(appState.history.hum, steps60)],
+    ['Gas', appState.latest.gas, linearForecast(appState.history.gas, steps10), linearForecast(appState.history.gas, steps30), linearForecast(appState.history.gas, steps60)],
+    ['Soil', appState.latest.soil, linearForecast(appState.history.soil, steps10), linearForecast(appState.history.soil, steps30), linearForecast(appState.history.soil, steps60)]
+  ];
+
+  let html = '<tr><th>Sensor<th>Now<th>+10m<th>+30m<th>+60m';
+  for (const r of rows) {
+    html += `<tr><td>${r[0]}<td>${fmt(r[1])}<td>${fmt(r[2])}<td>${fmt(r[3])}<td>${fmt(r[4])}`;
+  }
+  el.forecastTable.innerHTML = html;
+
+  let risk = 'Low';
+  const fTemp = rows[0][4], fHum = rows[1][4], fGas = rows[2][4];
+  if ((!Number.isNaN(fTemp) && (fTemp > 34 || fTemp < 14)) || (!Number.isNaN(fHum) && (fHum < 35 || fHum > 85)) || (!Number.isNaN(fGas) && fGas > 240)) {
+    risk = 'High';
+  } else if ((!Number.isNaN(fTemp) && (fTemp > 31 || fTemp < 16)) || (!Number.isNaN(fHum) && (fHum < 42 || fHum > 78)) || (!Number.isNaN(fGas) && fGas > 200)) {
+    risk = 'Medium';
+  }
+  el.forecastRisk.innerText = `Forecast risk: ${risk}`;
 }
 
-function getSignificantChanges(prev, curr) {
-  if (!prev) return [];
+function detectAnomalies() {
+  const checks = [
+    { name: 'Distance', arr: appState.history.distance, jump: 50 },
+    { name: 'Soil', arr: appState.history.soil, jump: 120 },
+    { name: 'Gas', arr: appState.history.gas, jump: 40 },
+    { name: 'Temp', arr: appState.history.temp, jump: 3 },
+    { name: 'Humidity', arr: appState.history.hum, jump: 8 }
+  ];
 
-  const deltas = {
-    distance: curr.distance - prev.distance,
-    soil: curr.soil - prev.soil,
-    gas: curr.gas - prev.gas,
-    temp: curr.temp - prev.temp,
-    hum: curr.hum - prev.hum
-  };
+  const t = nowLabel();
+  for (const c of checks) {
+    const arr = c.arr;
+    if (arr.length < 8) continue;
+    const recent = lastN(arr, 8);
+    const curr = recent[recent.length - 1];
+    const prev = recent[recent.length - 2];
+    const base = recent.slice(0, -1);
+    const m = mean(base);
+    const s = std(base);
+    const z = s > 0 ? Math.abs((curr - m) / s) : 0;
 
-  const changes = [];
-  if (Math.abs(deltas.distance) >= 20) changes.push(`distance ${deltas.distance > 0 ? 'increased' : 'dropped'} by ${Math.abs(Math.round(deltas.distance))} cm`);
-  if (Math.abs(deltas.soil) >= 50) changes.push(`soil moisture ${deltas.soil > 0 ? 'increased' : 'dropped'} by ${Math.abs(Math.round(deltas.soil))}`);
-  if (Math.abs(deltas.gas) >= 25) changes.push(`gas level ${deltas.gas > 0 ? 'increased' : 'dropped'} by ${Math.abs(Math.round(deltas.gas))}`);
-  if (Math.abs(deltas.temp) >= 1.5) changes.push(`temperature ${deltas.temp > 0 ? 'increased' : 'decreased'} by ${Math.abs(deltas.temp).toFixed(1)} degC`);
-  if (Math.abs(deltas.hum) >= 5) changes.push(`humidity ${deltas.hum > 0 ? 'increased' : 'decreased'} by ${Math.abs(deltas.hum).toFixed(1)}%`);
-
-  return changes;
-}
-
-function updateForecastAndActions(distance, soil, gas, temp, hum, score, cls, significantChanges) {
-  const aiForecast = document.getElementById('aiForecast');
-  const actionList = document.getElementById('actionList');
-  const actions = [];
-
-  const soilTrend = classifyTrend(getTrend(soilData.data), 15);
-  const gasTrend = classifyTrend(getTrend(gasData.data), 8);
-  const distTrend = classifyTrend(getTrend(ultrasonicData.data), 5);
-  const tempTrend = classifyTrend(getTrend(temperatureBarData.data), 1);
-
-  let forecast = 'Forecast: Conditions likely to remain stable in next 30-45 minutes.';
-
-  if (!Number.isNaN(gas) && gas > 220) {
-    forecast = 'Forecast: Air quality may worsen soon if ventilation is not improved.';
-  } else if (!Number.isNaN(soil) && soil < 330) {
-    forecast = 'Forecast: Root zone may dry out soon; growth slowdown is likely.';
-  } else if (!Number.isNaN(temp) && temp > 32) {
-    forecast = 'Forecast: Heat stress risk is increasing for the plant.';
-  } else if (!Number.isNaN(hum) && hum < 40) {
-    forecast = 'Forecast: Low humidity may increase water demand over the next hour.';
-  }
-
-  if (significantChanges.length > 0) {
-    actions.push(`Significant change detected: ${significantChanges[0]}. Run a quick manual re-check now.`);
-  }
-
-  if (cls === 1 && score >= 85) {
-    actions.push('Continue current settings and monitor every 15 minutes.');
-  } else if (cls === 1 && score >= 70) {
-    actions.push('Conditions are acceptable, but keep monitoring for drift every 10 minutes.');
-  } else {
-    actions.push('Recheck nutrient solution and stabilize environment before next growth cycle.');
-  }
-
-  if (!Number.isNaN(soil)) {
-    if (soil < 330) actions.push('Increase water flow or irrigation interval slightly (5-10%).');
-    if (soil > 780) actions.push('Reduce water flow and improve drainage to avoid over-saturation.');
-    if (soilTrend === 'falling') actions.push('Soil moisture trend is falling; schedule a near-term watering pulse.');
-  }
-
-  if (!Number.isNaN(gas)) {
-    if (gas > 220) actions.push('Increase ventilation immediately; inspect for gas buildup sources.');
-    if (gasTrend === 'rising') actions.push('Gas trend is rising; keep fans ON and recheck in 10 minutes.');
-  }
-
-  if (!Number.isNaN(temp)) {
-    if (temp > 32) actions.push('Lower temperature using airflow or shading; target 18-30 degC.');
-    if (temp < 16) actions.push('Raise ambient temperature; low temperature can slow nutrient uptake.');
-    if (tempTrend === 'rising') actions.push('Temperature is trending upward; prepare cooling before stress begins.');
-  }
-
-  if (!Number.isNaN(hum)) {
-    if (hum < 40) actions.push('Increase humidity slightly (mist/humidifier) to reduce plant stress.');
-    if (hum > 80) actions.push('Reduce humidity and increase airflow to prevent fungal risk.');
-  }
-
-  if (!Number.isNaN(distance) && distance < 20) {
-    actions.push('Obstacle detected close to rover path; reposition rover before the next scan.');
-  }
-  if (distTrend === 'falling') {
-    actions.push('Rover is moving closer to objects; verify path clearance.');
-  }
-
-  const uniqueActions = [...new Set(actions)].slice(0, 7);
-  aiForecast.innerText = forecast;
-  actionList.innerHTML = uniqueActions.map(item => `<li>${item}</li>`).join('');
-}
-
-async function fetchLatestThingSpeak() {
-  try {
-    const url = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json?api_key=${THINGSPEAK_READ_API_KEY}`;
-    const res = await fetch(url, { cache: 'no-store' });
-
-    if (!res.ok) {
-      throw new Error(`ThingSpeak HTTP ${res.status}`);
-    }
-
-    const feed = await res.json();
-
-    const distance = parseFloat(feed.field1);
-    const soil = parseFloat(feed.field2);
-    const gas = parseFloat(feed.field3);
-    const temp = parseFloat(feed.field4);
-    const hum = parseFloat(feed.field5);
-
-    const snapshot = { distance, soil, gas, temp, hum };
-    const significantChanges = getSignificantChanges(previousSnapshot, snapshot);
-    previousSnapshot = snapshot;
-
-    const aiScoreField = parseFloat(feed.field6);
-    const aiClassField = parseInt(feed.field7, 10);
-    const aiConfField = parseFloat(feed.field8);
-
-    const ts = feed.created_at ? new Date(feed.created_at) : new Date();
-    const timeText = ts.toLocaleTimeString();
-    document.getElementById('lastUpdated').innerText = `Last updated: ${ts.toLocaleString()}`;
-
-    if (ultrasonicEnabled && !Number.isNaN(distance)) {
-      document.getElementById('ultrasonic').innerText = distance.toFixed(1);
-      addPoint(ultrasonicData, ultrasonicChart, timeText, distance);
-      addRow('ultrasonicTable', timeText, distance.toFixed(1));
-    }
-
-    if (soilEnabled && !Number.isNaN(soil)) {
-      document.getElementById('soil').innerText = soil.toFixed(0);
-      addPoint(soilData, soilChart, timeText, soil);
-      addRow('soilTable', timeText, soil.toFixed(0));
-    }
-
-    if (gasEnabled && !Number.isNaN(gas)) {
-      document.getElementById('gas').innerText = gas.toFixed(0);
-      addPoint(gasData, gasChart, timeText, gas);
-      addRow('gasTable', timeText, gas.toFixed(0));
-    }
-
-    if (!Number.isNaN(temp) && temp > -100) {
-      document.getElementById('temperature').innerText = temp.toFixed(1);
-      addRow('temperatureTable', timeText, temp.toFixed(1));
-      addPoint(temperatureBarData, temperatureBarChart, timeText, temp);
-    } else {
-      document.getElementById('temperature').innerText = '--';
-    }
-
-    if (!Number.isNaN(hum) && hum > -100) {
-      addRow('humidityTable', timeText, hum.toFixed(1));
-      updateHumidityGauge(hum);
-    } else {
-      updateHumidityGauge(NaN);
-    }
-
-    if (!Number.isNaN(aiScoreField) && !Number.isNaN(aiClassField) && !Number.isNaN(aiConfField)) {
-      renderAI(aiScoreField, aiClassField, aiConfField, 'AI source: Arduino rule model (ThingSpeak fields 6-8).');
-      updateForecastAndActions(distance, soil, gas, temp, hum, aiScoreField, aiClassField, significantChanges);
-    } else {
-      const fallback = localPrediction(distance, soil, gas, temp, hum);
-      if (fallback) {
-        renderAI(fallback.score, fallback.cls, fallback.conf, 'AI source: Dashboard fallback model (computed locally).');
-        updateForecastAndActions(distance, soil, gas, temp, hum, fallback.score, fallback.cls, significantChanges);
+    if (z > 2.5 || Math.abs(curr - prev) > c.jump) {
+      const msg = `${t}: ${c.name} anomaly (value ${fmt(curr)}, z=${z.toFixed(2)})`;
+      if (!appState.anomalies.length || appState.anomalies[0] !== msg) {
+        appState.anomalies.unshift(msg);
       }
     }
-  } catch (err) {
-    console.error('Error fetching ThingSpeak data:', err.message);
-    document.getElementById('lastUpdated').innerText = `Last updated: error (${err.message})`;
+  }
+
+  appState.anomalies = appState.anomalies.slice(0, 10);
+  if (!appState.anomalies.length) {
+    el.anomalyList.innerHTML = '<li>No anomalies yet.';
+  } else {
+    el.anomalyList.innerHTML = appState.anomalies.map(a => `<li>${a}`).join('');
   }
 }
 
-fetchLatestThingSpeak();
-setInterval(fetchLatestThingSpeak, POLL_INTERVAL_MS);
+function evaluateSensorHealth() {
+  const specs = {
+    distance: { eps: 0.5, noisy: 80, drift: 90 },
+    soil: { eps: 2, noisy: 160, drift: 180 },
+    gas: { eps: 1, noisy: 70, drift: 80 },
+    temp: { eps: 0.05, noisy: 2.4, drift: 2.3 },
+    hum: { eps: 0.1, noisy: 6, drift: 7 }
+  };
+
+  const statuses = {};
+  for (const key of Object.keys(specs)) {
+    const arr = appState.history[key];
+    if (arr.length < 12) {
+      statuses[key] = 'Learning';
+      continue;
+    }
+
+    const s = specs[key];
+    const recent = lastN(arr, 12);
+    const stuck = recent.every(v => Math.abs(v - recent[0]) <= s.eps);
+    const noisy = std(recent) > s.noisy;
+    const first = mean(recent.slice(0, 6));
+    const second = mean(recent.slice(6));
+    const drift = Math.abs(second - first) > s.drift;
+
+    let level = 'Good';
+    if (stuck || noisy || drift) level = 'Fair';
+    if ((stuck && noisy) || (stuck && drift) || (noisy && drift)) level = 'Poor';
+    statuses[key] = `${level}${stuck ? ' | Stuck' : ''}${noisy ? ' | Noisy' : ''}${drift ? ' | Drift' : ''}`;
+  }
+
+  appState.health = statuses;
+  el.healthList.innerHTML = Object.entries(statuses)
+    .map(([k, v]) => `<li><b>${k.toUpperCase()}: ${v}`)
+    .join('');
+}
+
+function renderContributions(contrib) {
+  if (!contrib || !contrib.length) {
+    el.contribBox.innerHTML = '<div class="tiny">No explainability data yet.';
+    return;
+  }
+
+  const maxPoints = Math.max(1, ...contrib.map(c => c.points));
+  let html = '';
+  for (const c of contrib) {
+    const pct = Math.round((c.points / maxPoints) * 100);
+    html += `
+      <div class="contrib-row">
+        <div>${c.name}
+        <div class="contrib-track"><div class="contrib-fill" style="width:${pct}%">
+        <div>${c.points}
+      
+    `;
+  }
+  el.contribBox.innerHTML = html;
+}
+
+function actionScore(text) {
+  const stat = actionStats[text] || { up: 0, down: 0 };
+  const total = stat.up + stat.down;
+  if (!total) return 0;
+  return (stat.up - stat.down) / total;
+}
+
+function voteAction(text, vote) {
+  if (!actionStats[text]) actionStats[text] = { up: 0, down: 0 };
+  if (vote === 'up') actionStats[text].up += 1;
+  if (vote === 'down') actionStats[text].down += 1;
+  localStorage.setItem('ai_action_stats_v1', JSON.stringify(actionStats));
+}
+
+function buildRecommendations(model) {
+  const s = appState.latest;
+  const rec = [];
+
+  if (appState.anomalies.length) rec.push('Inspect anomalous sensors immediately and validate readings before acting.');
+  if (s.soil < 330) rec.push('Increase irrigation flow by 5-10% to prevent root-zone dryness.');
+  if (s.soil > 780) rec.push('Reduce irrigation interval and improve drainage to avoid oversaturation.');
+  if (s.gas > 220) rec.push('Boost ventilation now and inspect nearby sources of gas buildup.');
+  if (s.temp > 32) rec.push('Apply cooling or shade immediately; target 18-30 &deg;C.');
+  if (s.temp < 16) rec.push('Raise ambient temperature to protect nutrient uptake rate.');
+  if (s.hum < 40) rec.push('Increase humidity gradually (mist/humidifier) to reduce water stress.');
+  if (s.hum > 80) rec.push('Decrease humidity and raise airflow to prevent fungal growth.');
+  if (s.distance < 20) rec.push('Obstacle is near rover path; reposition before next scan cycle.');
+  if (model.score >= 85) rec.push('Keep current parameters; verify stability every 15 minutes.');
+  if (appState.vision.stress === 'high') rec.push('Vision detects low greenness; inspect leaves for nutrient imbalance signs.');
+  if (appState.health.gas && appState.health.gas.includes('Poor')) rec.push('Gas sensor quality is poor; calibrate or replace before trusting air-quality decisions.');
+
+  if (!rec.length) rec.push('Conditions stable. Continue monitoring and collect more labeled outcomes for model improvement.');
+
+  const unique = [...new Set(rec)];
+  unique.sort((a, b) => actionScore(b) - actionScore(a));
+  appState.recommendations = unique.slice(0, 8);
+
+  el.recommendationsList.innerHTML = appState.recommendations.map(text => `
+    <li class="rec-item">
+      <div>${text}
+      <div class="rec-actions">
+        <button class="rec-btn" data-vote="up" data-action="${escapeHtml(text)}">Upvote
+        <button class="rec-btn" data-vote="down" data-action="${escapeHtml(text)}">Downvote
+      
+    
+  `).join('');
+}
+
+function renderSimulation() {
+  const s = appState.latest;
+  if ([s.distance, s.soil, s.gas, s.temp, s.hum].some(Number.isNaN)) {
+    el.simResult.innerText = 'Simulation score: waiting for complete data...';
+    return;
+  }
+
+  const dTemp = Number(el.simTemp.value);
+  const dHum = Number(el.simHum.value);
+  const dSoil = Number(el.simSoil.value);
+  const dGas = Number(el.simGas.value);
+
+  el.simTempVal.innerText = dTemp;
+  el.simHumVal.innerText = dHum;
+  el.simSoilVal.innerText = dSoil;
+  el.simGasVal.innerText = dGas;
+
+  const sim = {
+    distance: s.distance,
+    soil: s.soil + dSoil,
+    gas: s.gas + dGas,
+    temp: s.temp + dTemp,
+    hum: s.hum + dHum
+  };
+
+  const out = localPredictionWithExplain(sim);
+  const cls = out.cls === 1 ? 'Suitable' : 'Not Suitable';
+  const top = [...out.contributions].sort((a, b) => b.points - a.points)[0];
+  el.simResult.innerText = `Simulation score: ${out.score}/100 (${cls}), confidence ${out.conf.toFixed(2)}. Top factor: ${top.name}.`;
+}
+
+function heatColor(score) {
+  if (Number.isNaN(score)) return 'rgba(40,70,50,0.9)';
+  const hue = clamp((score / 100) * 120, 0, 120);
+  return `hsl(${hue}, 70%, 45%)`;
+}
+
+function addHeatSample(x, y, score) {
+  const size = appState.heatmap.size;
+  const gx = clamp(Math.floor((x / 100) * size), 0, size - 1);
+  const gy = clamp(Math.floor((y / 100) * size), 0, size - 1);
+  const cell = appState.heatmap.grid[gy][gx];
+  cell.count += 1;
+  cell.sum += score;
+}
+
+function drawHeatmap() {
+  const canvas = el.heatmapCanvas;
+  const ctx = canvas.getContext('2d');
+  const size = appState.heatmap.size;
+  const cellW = canvas.width / size;
+  const cellH = canvas.height / size;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const c = appState.heatmap.grid[y][x];
+      const avg = c.count ? c.sum / c.count : NaN;
+      ctx.fillStyle = heatColor(avg);
+      ctx.fillRect(x * cellW, y * cellH, cellW, cellH);
+      ctx.strokeStyle = 'rgba(170,255,210,0.15)';
+      ctx.strokeRect(x * cellW, y * cellH, cellW, cellH);
+    }
+  }
+}
+
+function cellUncertainty(x, y) {
+  const g = appState.heatmap.grid;
+  const size = appState.heatmap.size;
+  const scores = [];
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const ny = y + dy;
+      const nx = x + dx;
+      if (ny < 0 || nx < 0 || ny >= size || nx >= size) continue;
+      const c = g[ny][nx];
+      if (c.count) scores.push(c.sum / c.count);
+    }
+  }
+  return scores.length >= 2 ? std(scores) : 999;
+}
+
+function suggestNextWaypoint() {
+  const size = appState.heatmap.size;
+  let best = null;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const cell = appState.heatmap.grid[y][x];
+      const unc = cellUncertainty(x, y);
+      const score = { x, y, count: cell.count, unc };
+      if (!best) best = score;
+      else if (score.count < best.count || (score.count === best.count && score.unc > best.unc)) best = score;
+    }
+  }
+  if (!best) return null;
+
+  const xPct = Math.round(((best.x + 0.5) / size) * 100);
+  const yPct = Math.round(((best.y + 0.5) / size) * 100);
+  return { xPct, yPct, reason: `least sampled=${best.count}, uncertainty=${best.unc.toFixed(1)}` };
+}
+
+function updateMaintenance() {
+  const uptimeH = (Date.now() - appState.startMs) / 3600000;
+  const anomalyPenalty = appState.anomalies.length * 2.2;
+
+  const healthLevels = Object.values(appState.health);
+  const poorCount = healthLevels.filter(v => String(v).startsWith('Poor')).length;
+  const fairCount = healthLevels.filter(v => String(v).startsWith('Fair')).length;
+
+  const pump = clamp(100 - uptimeH * 0.7 - anomalyPenalty * 0.4, 10, 100);
+  const fan = clamp(100 - uptimeH * 0.6 - anomalyPenalty * 0.3 - (appState.latest.gas > 220 ? 6 : 0), 10, 100);
+  const sensor = clamp(100 - poorCount * 25 - fairCount * 10, 5, 100);
+
+  renderHealthBar(el.pumpBar, el.pumpPct, pump);
+  renderHealthBar(el.fanBar, el.fanPct, fan);
+  renderHealthBar(el.sensorBar, el.sensorPct, sensor);
+}
+
+function renderHealthBar(barEl, pctEl, value) {
+  barEl.style.width = `${value.toFixed(0)}%`;
+  pctEl.innerText = `${value.toFixed(0)}%`;
+}
+
+let chatTyping = false;
+
+function renderChatText(text) {
+  return escapeHtml(text).replaceAll('\n', '<br>');
+}
+
+function createChatBubble(role) {
+  const div = document.createElement('div');
+  div.className = 'chat-msg';
+  div.innerHTML = `<b>${role}: <span class="chat-content">`;
+  el.chatBox.appendChild(div);
+  el.chatBox.scrollTop = el.chatBox.scrollHeight;
+  return div.querySelector('.chat-content');
+}
+
+function addChat(role, text) {
+  const span = createChatBubble(role);
+  span.innerHTML = renderChatText(text);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function addChatTypewriter(role, text, msPerChar = 12) {
+  const span = createChatBubble(role);
+  span.classList.add('typing');
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    out += ch;
+    span.innerHTML = renderChatText(out);
+    el.chatBox.scrollTop = el.chatBox.scrollHeight;
+    const extra = /[.!?\n]/.test(ch) ? 45 : 0;
+    await sleep(msPerChar + extra);
+  }
+  span.classList.remove('typing');
+}
+
+function buildDetailedStatus() {
+  const s = appState.latest;
+  const cls = s.aiClass === 1 ? 'Suitable' : 'Not Suitable';
+  const topContrib = localPredictionWithExplain(s).contributions.sort((a, b) => b.points - a.points)[0];
+  return [
+    'Current system summary:',
+    `- Suitability: ${fmt(s.aiScore)}/100 (${cls}), confidence ${Number.isNaN(s.aiConf) ? '--' : s.aiConf.toFixed(2)}.`,
+    `- Environment: temp ${fmt(s.temp)} degC, humidity ${fmt(s.hum)}%, gas ${fmt(s.gas)}, soil ${fmt(s.soil)}, distance ${fmt(s.distance)} cm.`,
+    `- Key driver: ${topContrib.name} contributes ${topContrib.points} score points.`,
+    `- Forecast risk: ${el.forecastRisk.innerText.replace('Forecast risk: ', '')}.`,
+    `- Active anomalies: ${appState.anomalies.length}.`
+  ].join('\n');
+}
+
+function buildDetailedForecast() {
+  const steps10 = Math.round((10 * 60) / (POLL_INTERVAL_MS / 1000));
+  const steps30 = Math.round((30 * 60) / (POLL_INTERVAL_MS / 1000));
+  const steps60 = Math.round((60 * 60) / (POLL_INTERVAL_MS / 1000));
+  const f = {
+    temp10: linearForecast(appState.history.temp, steps10),
+    temp30: linearForecast(appState.history.temp, steps30),
+    temp60: linearForecast(appState.history.temp, steps60),
+    hum10: linearForecast(appState.history.hum, steps10),
+    hum30: linearForecast(appState.history.hum, steps30),
+    hum60: linearForecast(appState.history.hum, steps60),
+    gas10: linearForecast(appState.history.gas, steps10),
+    gas30: linearForecast(appState.history.gas, steps30),
+    gas60: linearForecast(appState.history.gas, steps60),
+    soil10: linearForecast(appState.history.soil, steps10),
+    soil30: linearForecast(appState.history.soil, steps30),
+    soil60: linearForecast(appState.history.soil, steps60)
+  };
+  return [
+    'Forecast details:',
+    `- Temperature now ${fmt(appState.latest.temp)} -> +10m ${fmt(f.temp10)}, +30m ${fmt(f.temp30)}, +60m ${fmt(f.temp60)}.`,
+    `- Humidity now ${fmt(appState.latest.hum)} -> +10m ${fmt(f.hum10)}, +30m ${fmt(f.hum30)}, +60m ${fmt(f.hum60)}.`,
+    `- Gas now ${fmt(appState.latest.gas)} -> +10m ${fmt(f.gas10)}, +30m ${fmt(f.gas30)}, +60m ${fmt(f.gas60)}.`,
+    `- Soil now ${fmt(appState.latest.soil)} -> +10m ${fmt(f.soil10)}, +30m ${fmt(f.soil30)}, +60m ${fmt(f.soil60)}.`,
+    `- Overall forecast risk: ${el.forecastRisk.innerText.replace('Forecast risk: ', '')}.`
+  ].join('\n');
+}
+
+function buildDetailedActions() {
+  if (!appState.recommendations.length) {
+    return 'Recommended actions are still being generated; wait for a few sensor cycles.';
+  }
+  const lines = ['Top recommended actions right now:'];
+  appState.recommendations.slice(0, 5).forEach((r, i) => lines.push(`${i + 1}. ${r}`));
+  lines.push('These are ranked using live conditions + your Upvote/Downvote feedback history.');
+  return lines.join('\n');
+}
+
+function buildDetailedMaintenance() {
+  return [
+    'Maintenance health snapshot:',
+    `- Pump health: ${el.pumpPct.innerText}.`,
+    `- Fan health: ${el.fanPct.innerText}.`,
+    `- Sensor network health: ${el.sensorPct.innerText}.`,
+    `- Sensor diagnostics: ${Object.entries(appState.health).map(([k, v]) => `${k}=${v}`).join(', ') || 'learning'}.`
+  ].join('\n');
+}
+
+function buildDetailedExplainability() {
+  const contrib = localPredictionWithExplain(appState.latest).contributions.sort((a, b) => b.points - a.points);
+  const lines = ['Explainability breakdown (score-point contribution):'];
+  contrib.forEach(c => lines.push(`- ${c.name}: ${c.points} points (normalized feature score ${Math.round(c.score * 100)}%).`));
+  lines.push('Higher points mean stronger positive impact on current suitability.');
+  return lines.join('\n');
+}
+
+function chatReply(q) {
+  const text = q.toLowerCase();
+  if (text.includes('status') || text.includes('summary') || text.includes('overview')) return buildDetailedStatus();
+  if (text.includes('forecast') || text.includes('predict')) return buildDetailedForecast();
+  if (text.includes('action') || text.includes('what should') || text.includes('do')) return buildDetailedActions();
+  if (text.includes('next') || text.includes('waypoint') || text.includes('where')) {
+    return `Next waypoint recommendation:\n- ${el.nextWaypoint.innerText || '--'}\n- Position feed note: ${el.positionInfo.innerText || '--'}`;
+  }
+  if (text.includes('anomaly')) {
+    if (!appState.anomalies.length) return 'Anomaly report:\n- No anomalies currently detected in recent windows.';
+    return `Anomaly report:\n${appState.anomalies.slice(0, 5).map((a, i) => `${i + 1}. ${a}`).join('\n')}`;
+  }
+  if (text.includes('maintenance') || text.includes('health')) return buildDetailedMaintenance();
+  if (text.includes('vision') || text.includes('leaf') || text.includes('image')) {
+    return `Vision fusion status:\n- ${el.visionResult.innerText}\n- This signal is merged into action prioritization when stress is medium/high.`;
+  }
+  if (text.includes('explain') || text.includes('why') || text.includes('contribution')) return buildDetailedExplainability();
+  return [
+    'I can give detailed answers from live dashboard data.',
+    'Try one of these:',
+    '- \"status summary\"',
+    '- \"detailed forecast\"',
+    '- \"what actions should I do now\"',
+    '- \"explain why score changed\"',
+    '- \"maintenance health details\"',
+    '- \"next waypoint and reason\"'
+  ].join('\n');
+}
+
+function fmt(v) {
+  return Number.isNaN(v) ? '--' : (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(1));
+}
+
+// DHT error code: treat -999 (or similar sentinel) as missing data.
+function sanitizeDhtValue(v) {
+  return (Number.isNaN(v) || v <= -900) ? NaN : v;
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function syntheticPosition() {
+  appState.sampleCount += 1;
+  return {
+    x: (appState.sampleCount * 17) % 100,
+    y: (appState.sampleCount * 29) % 100
+  };
+}
+
+async function fetchLatest() {
+  const stamp = new Date();
+  el.pollStatus.innerText = `Polling: ${stamp.toLocaleTimeString()}`;
+
+  const url = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json?api_key=${THINGSPEAK_READ_API_KEY}`;
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`ThingSpeak HTTP ${res.status}`);
+  const feed = await res.json();
+
+  const distance = parseFloat(feed.field1);
+  const soil = parseFloat(feed.field2);
+  const gas = parseFloat(feed.field3);
+  const temp = sanitizeDhtValue(parseFloat(feed.field4));
+  const hum = sanitizeDhtValue(parseFloat(feed.field5));
+  const aiScoreField = parseFloat(feed.field6);
+  const aiClassField = parseInt(feed.field7, 10);
+  const aiConfField = parseFloat(feed.field8);
+  const posX = parseFloat(feed.field9);
+  const posY = parseFloat(feed.field10);
+
+  const ts = feed.created_at ? new Date(feed.created_at) : new Date();
+  const tLabel = nowLabel(ts);
+
+  appState.latest.distance = distance;
+  appState.latest.soil = soil;
+  appState.latest.gas = gas;
+  appState.latest.temp = temp;
+  appState.latest.hum = hum;
+
+  pushTimestamp(tLabel);
+  if (!Number.isNaN(distance)) pushHistory('distance', distance);
+  if (!Number.isNaN(soil)) pushHistory('soil', soil);
+  if (!Number.isNaN(gas)) pushHistory('gas', gas);
+  if (!Number.isNaN(temp)) pushHistory('temp', temp);
+  if (!Number.isNaN(hum)) pushHistory('hum', hum);
+
+  el.ultrasonicValue.innerText = fmt(distance);
+  el.soilValue.innerText = fmt(soil);
+  el.gasValue.innerText = fmt(gas);
+  el.tempValue.innerText = fmt(temp);
+
+  if (!Number.isNaN(distance)) addRow(el.ultrasonicTable, tLabel, fmt(distance));
+  if (!Number.isNaN(soil)) addRow(el.soilTable, tLabel, fmt(soil));
+  if (!Number.isNaN(gas)) addRow(el.gasTable, tLabel, fmt(gas));
+  if (!Number.isNaN(temp)) addRow(el.tempTable, tLabel, fmt(temp));
+  if (!Number.isNaN(hum)) addRow(el.humTable, tLabel, fmt(hum));
+
+  if (ultrasonicEnabled && !Number.isNaN(distance)) updateChart(charts.ultrasonic, tLabel, distance);
+  if (soilEnabled && !Number.isNaN(soil)) updateChart(charts.soil, tLabel, soil);
+  if (gasEnabled && !Number.isNaN(gas)) updateChart(charts.gas, tLabel, gas);
+  if (!Number.isNaN(temp)) updateChart(charts.tempBar, tLabel, temp);
+
+  updateHumidityGauge(hum);
+
+  const model = localPredictionWithExplain(appState.latest);
+  let aiScore = model.score;
+  let aiClass = model.cls;
+  let aiConf = model.conf;
+  let source = 'Local model';
+
+  if (!Number.isNaN(aiScoreField) && !Number.isNaN(aiClassField) && !Number.isNaN(aiConfField)) {
+    aiScore = aiScoreField;
+    aiClass = aiClassField;
+    aiConf = aiConfField;
+    source = 'Arduino model (ThingSpeak fields 6-8)';
+  }
+
+  appState.latest.aiScore = aiScore;
+  appState.latest.aiClass = aiClass;
+  appState.latest.aiConf = aiConf;
+  pushHistory('score', aiScore);
+
+  el.sourceStatus.innerText = `AI Source: ${source}`;
+  el.aiReason.innerText = `Explainability driver: ${[...model.contributions].sort((a,b) => b.points - a.points)[0].name}.`;
+  el.aiScorePill.innerText = `${aiClass === 1 ? 'Suitable' : 'Not Suitable'} | ${fmt(aiScore)}/100 | conf ${aiConf.toFixed(2)}`;
+  el.kpiScore.innerText = fmt(aiScore);
+  el.kpiClass.innerText = aiClass === 1 ? 'Suitable' : 'Not Suitable';
+  el.kpiConf.innerText = aiConf.toFixed(2);
+  el.kpiLast.innerText = ts.toLocaleTimeString();
+
+  renderContributions(model.contributions);
+  renderForecasts();
+  detectAnomalies();
+  evaluateSensorHealth();
+  buildRecommendations(model);
+  renderSimulation();
+  updateMaintenance();
+
+  let useX = posX, useY = posY;
+  if (Number.isNaN(useX) || Number.isNaN(useY)) {
+    const synth = syntheticPosition();
+    useX = synth.x;
+    useY = synth.y;
+    el.positionInfo.innerText = `Position feed missing; using synthetic scan path (${Math.round(useX)}, ${Math.round(useY)}).`;
+  } else {
+    el.positionInfo.innerText = `Position from feed: (${fmt(useX)}, ${fmt(useY)}).`;
+  }
+
+  addHeatSample(clamp(useX, 0, 100), clamp(useY, 0, 100), aiScore);
+  drawHeatmap();
+  const wp = suggestNextWaypoint();
+  if (wp) el.nextWaypoint.innerText = `Go to approx (${wp.xPct}, ${wp.yPct}) because ${wp.reason}.`;
+}
+
+function bindEvents() {
+  el.toggleUltrasonic.addEventListener('change', e => { ultrasonicEnabled = e.target.checked; });
+  el.toggleSoil.addEventListener('change', e => { soilEnabled = e.target.checked; });
+  el.toggleGas.addEventListener('change', e => { gasEnabled = e.target.checked; });
+
+  el.refreshBtn.addEventListener('click', () => runCycle());
+
+  [el.simTemp, el.simHum, el.simSoil, el.simGas].forEach(inp => inp.addEventListener('input', renderSimulation));
+
+  el.recommendationsList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button.rec-btn');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const vote = btn.dataset.vote;
+    voteAction(action, vote);
+    buildRecommendations(localPredictionWithExplain(appState.latest));
+  });
+
+  el.visionInput.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const cvs = el.visionCanvas;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+      ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
+
+      const data = ctx.getImageData(0, 0, cvs.width, cvs.height).data;
+      let gAcc = 0, total = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const sum = r + g + b + 1;
+        gAcc += g / sum;
+        total += 1;
+      }
+
+      const ratio = gAcc / total;
+      appState.vision.greenRatio = ratio;
+      let stress = 'low';
+      if (ratio < 0.36) stress = 'high';
+      else if (ratio < 0.42) stress = 'medium';
+      appState.vision.stress = stress;
+      el.visionResult.innerText = `Greenness index: ${ratio.toFixed(3)} | Estimated leaf stress: ${stress.toUpperCase()}.`;
+
+      URL.revokeObjectURL(url);
+      buildRecommendations(localPredictionWithExplain(appState.latest));
+    };
+    img.src = url;
+  });
+
+  async function sendChat() {
+    const q = el.chatInput.value.trim();
+    if (!q || chatTyping) return;
+    chatTyping = true;
+    el.chatSend.disabled = true;
+    el.chatInput.disabled = true;
+    addChat('You', q);
+    const r = chatReply(q);
+    await addChatTypewriter('AI', r);
+    el.chatInput.value = '';
+    el.chatSend.disabled = false;
+    el.chatInput.disabled = false;
+    chatTyping = false;
+    el.chatInput.focus();
+  }
+
+  el.chatSend.addEventListener('click', sendChat);
+  el.chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendChat();
+  });
+}
+
+async function runCycle() {
+  try {
+    await fetchLatest();
+  } catch (err) {
+    el.pollStatus.innerText = `Polling error: ${err.message}`;
+  }
+}
+
+bindEvents();
+addChat('AI', 'Copilot ready. Ask me: status, forecast, actions, anomalies, maintenance, next waypoint, or vision.');
+runCycle();
+setInterval(runCycle, POLL_INTERVAL_MS);
 </script>
 </body>
 </html>
